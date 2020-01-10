@@ -2776,7 +2776,7 @@ A	@1v10 cccc</pre>
   number2 = gate time (defaults to 0)<br>
   number3 = volume adjustment per one round (V command level, defaults to ±0)<p>
   <p>The note length and dots are the same as c d e f g a b r commands. You cannot specify a length longer than 255 steps. Please specify only c d e f g a b o > < commands inside the {{ }}</p>
-  <p>The tie flag indicates whether to add a tie (&) after each note. The gate time is the specified clock value to treat the end portion as a rest. And the volume adjustment is the volume change each time the pitches goes around.</p>
+  <p>The tie flag indicates whether to add a tie (&amp;) after each note. The gate time is the specified clock value to treat the end portion as a rest. And the volume adjustment is the volume change each time the pitches goes around.</p>
   <p>If you turn off the tie and set length2 to a reasonable length, things like playing arpeggios are also possible. However, please note that the sound will be cut off when the duration is length1(-number2)</p>
   <p><span>Caution 1</span> If the volume adjustment takes place, the changed volume will remain after this command. You need to redefine the volume as needed to produce the next note.</p>
   <p><span>Caution 2</span> The effects of the W S commands are not reflected in this command.</p>
