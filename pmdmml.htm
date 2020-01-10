@@ -63,6 +63,7 @@
       position: fixed;
       top: 0;
       overflow-y: scroll;
+      padding-top: 5px;
     }
     .sidebar ul {
       font-size: 14px;
@@ -78,6 +79,7 @@
 </head>
 <body>
 <div class="sidebar">
+  <a href="."><< Back to Index</a>
   <h3>Table of Contents</h3>
   <ul>
     <li>1. <a href="#1">Basic Matter</a>
@@ -232,6 +234,7 @@
       <li>12.1. <a href="#12-1">Grace Note Setting</a></li>
       <li>12.2. <a href="#12-2">Pseudo Echo Setting</a></li>
       <li>12.3. <a href="#12-3">Keyon Delay Per Slot Setting</a></li>
+      <li>12.4. <a href="#12-4">Broken Chord Setting</a></li>
     </ul></li>
     <li>13. <a href="#13">MML Commands — Pan Setting Commands</a>
     <ul>
@@ -268,6 +271,7 @@
       <li>16.6. <a href="#16-6">Comment Setting</a></li>
       <li>16.7. <a href="#16-7">Comment Setting 2</a></li>
     </ul></li>
+    <li>17. <a href="#17">Producer Contact/Inquiries</a>
   </ul>
 </div>
 <div class="doc">
@@ -1169,10 +1173,14 @@ A	!A</pre>
 
   <h2 id="4-3">4.3. Portamento Setting</h2>
   <pre class="command">{ }</pre>
-  <p><span>Format</span> <code>{interval1 interval2} [length] [.]</code></p>
-  <p><span>Range</span> 1–255, whole-note length divisor(<a href="#2-11">→§2.11.</a>) or clock value attached by %</p>
+  <p><span>Format</span> <code>{interval1 interval2} [length1] [.] [,length2]</code></p>
+  <table>
+    <tr><td><span>Range</span></td><td>(length1) 1–255, whole-note length divisor(<a href="#2-11">→§2.11.</a>) or clock value attached by %</td></tr>
+    <tr><td></td><td>(length2) Same as above, shorter than length1</td></tr>
+  </table>
   <p><span>Sound Source</span> FM / SSG / PCM(AD,PPZ)</p>
   <p>Specify a sound that connects smoothly from pitch 1 to pitch 2 with a length equal to the sound length.</p>
+  <p>When length2 is specified, the delay between the start of sound generation to the portamento is set.</p>
   <p>Regarding note length and period, it is equivalent to c d e f g a b r command. Tone length exceeding 255 steps cannot be specified.</p>
   <p>Inside the { }, please use only the c d e f g a b o &gt; &lt; commands.</p>
   <p>This cannot be used on channel R.</p>
@@ -1180,6 +1188,8 @@ A	!A</pre>
   <p><span>Caution 2</span> The effects of the W S commands are not reflected in this command.</p>
   <p><span>Example 1</span> <code>{cg}4</code><br>
   <span>Result</span> A quarter note length portamento going from do to sol.</p>
+  <p><span>Example 2</span> <code>{cg}4,8</code><br>
+  <span>Result</span> A quarter note length portamento going from do to sol after an eighth note delay, which is actually equivalent to <code>c8&{cg}8</code>.</p>
   <span>See also</span>
   <ul>
     <li>W command (<a href="#12-2">→§12.2.</a>)</li>
@@ -2747,6 +2757,33 @@ A	@1v10 cccc</pre>
   <p><span>Example</span> <code>sk12,l8</code><br>
   <span>Result</span> After this command, slot 3 and 4 will have keyon delayed by an eighth note length.</p>
   <p><span>Caution</span> If a note has a length shorter than the set delay value, the keyon of the delayed slots will not be done.</p>
+
+  <h2 id="12-4">12.4. Broken Chord Setting</h2>
+  <pre class="command">{{ }}</pre>
+  <p><span>Format</span> <code>{{ pitch1[pitch2..pitch16] }} [length1][.][,length2[,number1[,number2[,±number3]]]]</code></p>
+  <table>
+    <tr><td><span>Range</span></td><td>(length1) 1–255, whole-note length divisor(<a href="#2-11">→§2.11.</a>) or clock value attached by %</td></tr>
+    <tr><td></td><td>(length2) Same as above, shorter than length1</td></tr>
+    <tr><td></td><td>(number1) 0–1</td></tr>
+    <tr><td></td><td>(number2) 0–255, shorter than length1/td></tr>
+    <tr><td></td><td>(number3) -128–+127</td></tr>
+  </table>
+  <p><span>Sound Source</span> FM / SSG / PCM(AD,PPZ)</p>
+  <p>Expands a chord with the duration of length1 before the compilation using the pitches listed in {{}}</p>
+  <p>length1 = total length<br>
+  length2 = note length (defaults to %1)<br>
+  number1 = tie flag (0 = off, 1 = on (default))<br>
+  number2 = gate time (defaults to 0)<br>
+  number3 = volume adjustment per one round (V command level, defaults to ±0)<p>
+  <p>The note length and dots are the same as c d e f g a b r commands. You cannot specify a length longer than 255 steps. Please specify only c d e f g a b o > < commands inside the {{ }}</p>
+  <p>The tie flag indicates whether to add a tie (&) after each note. The gate time is the specified clock value to treat the end portion as a rest. And the volume adjustment is the volume change each time the pitches goes around.</p>
+  <p>If you turn off the tie and set length2 to a reasonable length, things like playing arpeggios are also possible. However, please note that the sound will be cut off when the duration is length1(-number2)</p>
+  <p><span>Caution 1</span> If the volume adjustment takes place, the changed volume will remain after this command. You need to redefine the volume as needed to produce the next note.</p>
+  <p><span>Caution 2</span> The effects of the W S commands are not reflected in this command.</p>
+  <p><span>Example 1</span> <code>{{cg}}4</code><br>
+  <span>Result</span> A quarter note length broken chord that switches between do and sol at high speed (1 clock).</p>
+  <p><span>Example 2</span> <code>{{ceg>c<}}4,32,0</code><br>
+  <span>Result</span> Equivalent to <code>[c32e32g32>c32<]2</code>.</p>
 <!-- 13. -->
   <h1 id="13">13. MML Commands — Pan Setting Commands</h1>
   <p>This section summarizes commands to set sound output position (pan).</p>
@@ -3212,7 +3249,17 @@ H	cde ` fga   b</pre>
   <p>It must be written like this:</p><pre>
 `	Comment
 `</pre>
-  <small>Section 17. (Producer Contact/Inquiries) is removed in this doc since the address and all telephone numbers are dead or invalid now.</small>
+<!-- 17. -->
+  <h1 id="17">17. Producer Contact/Inquiries</h1>
+  <p>梶原　正裕 (Masahiro Kajihara / KAJA)</p>
+  <table>
+    <tr><td>Mail</td><td>: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJEAAAAPCAYAAADktC0QAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAE3UlEQVRo3u2ZW2xUVRSGP8S2XmihHYhXjNwUIoKEkABi1cR4QXgxEpsQUND6gEWjokZDE0CiDXiLN15UIiaQyC1BkHg3gKBSUwpolKqkOlUbLi1QOpYK48t/kuX2zJxz5kzMNHa9zNn7rLX3Xv/+z9pr7QE4DCwknuRjjP9SbgLWAM1AF3AEqAeeAsoLbK0utgWH9Vl5Gqca2NADyHMesBp4BdghMpUBQ4GHgdFAIzCugNbcI7DtaVEkVzkb2AmsBEqy6NUAB0Wu3v3KMRJdrxB/v9qDgXeBVuBP4AfggQDHwtgcBx4BXtZxchLYCCSMTgmwHPgVOKXj51mgyOi0AvOAWuAPjbsZuMCZbxHQCcwFTgOLgSTQoehUCXwDrBCJZhnbSzRmJ9CiqLVUftl11ADPA+3yqRYo1dHZIT/mRMQpKmmKhNlvQArYr2gWFdNIvthFjpDBUjPge8BuYAxwKbAASAPTszgaxuYI8AuwBBgGTFPfOqPzlvqmAxcCdwDHgBeNThLYCzwDXCEyHAZeMzplwAkdWwDviDBXC5glwO/ALr2fC2wx9p+JWJO08WuAJm2QXce3+jCGA8vk81Zgtvre1saWx8A2iFSvi0DTNGe1CHp7REwj+eItKgEc0MsgaQZejfi1+NnUOzq1QDdwPjAQ+At4wtFZpi+h2Di809FZCXxt2vcCn+q5UqBe5ti0GSArRUy0uWmB58m5wCEfEn1i2gNl96bpu0Z9E2Ngmw3r/s4p4koUTEP74h1nxUreksB9IUjUooGjiJ/NdqfdqNxlmL7OviY6eLJbJBth+r5ydI46VdY4JdIAdwEfKwp60kfz7jLHfLeeR+m3weingG0+PjY6kTZTX/88Y+vJWO1lQ4b3UTAN7YtHooeAKcAgTWJlArBJzqUE7qQAZ8LaHHPaHaaKKjMRwkq7fktN30lHJy1iYKJJUs/Dge8d/SlAP0PGkcBPeu7nrM2TQz7+dDpryNTXJwa22aTMZ06/92EwDe2LR6LvgPEK8XVGsQL4ADgD3AAMUAL2ZRZHotgMcNrehp0wBCv3Gd+PgNmk24TqlEhqo9BCkaRZfTOA940+jg1OAZCL5IJtkBwPWFs+Mf1XdbYF2APMBx4EbjbHQLku4Zp03lYAV2UZM4rNBJ9w26UosEebP9nRmShnmyL4edDM/7mSyTFKtFcJ/NMiSg1wkSo2zDyjzXjnKG+KI7lgGyR7hdl1Gd7nE9OMJf4qYL0S04S+zDRQpZL5WlU2DcDlzpFhE8OwNkOAx1VC36hjda0S3zatYwEwVZVElaqNl5QghpUNwJ0K1ytUrm8ToepVjR1QaXsbcIvKXwyhFylaDwbeUIIbR3LB1k/qDBbtKowek7+jgHt0DM3MM6ZZ7yESKhHXqz1f+URKVdB4Ad0G7MswRlibxc490VrniCtW5dCiL+hn4EkH4KRzJQHwHPCj07dJdzJFATfafknvlUrMuxTVqlVK1wesI+0UKl6ld2sMbN12nbP5JcALujPz7p4ezQOmQb7ElqMKy4V881phIk8VcLEIlVBOslzAz8xAoqFO34cifa/ElFLlBmecm9hCvb7vC9wNfKRoe0pR8AvgaV1W+slmRbbJKj7myeepvRSIL7MU4rcT/b+mnvSfXYVyjVYdu43882+R/7X8DclEtpKj2hMUAAAAAElFTkSuQmCC"></td></tr>
+    <tr><td>Website</td><td>: <a href="http://www5.airnet.ne.jp/kajapon/">http://www5.airnet.ne.jp/kajapon/</a></td></tr>
+    <tr><td>(alt)</td><td>: <a href="https://sites.google.com/site/kajapon/">https://sites.google.com/site/kajapon/</a></td></tr>
+    <tr><td>Twitter</td><td>: <a href="https://twitter.com/kajaponn">https://twitter.com/kajaponn</a></td></tr>
+    <tr><td>YouTube</td><td>: <a href="https://www.youtube.com/channel/UC3Ytls4c0n_OpFFQQDXFYhA">https://www.youtube.com/channel/UC3Ytls4c0n_OpFFQQDXFYhA</a></td></tr>
+  </table>
+
   <div style="text-align: center;">
     <hr style="margin: 24px 0 -11.5px 0;">
     <span style="background: white;">End of PMDMML.MAN</span>
